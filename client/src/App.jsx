@@ -43,18 +43,19 @@ const router = createBrowserRouter([
         path: "/write",
         element: <Write />,
       },
+      {
+        // Login page route
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        // Register page route
+        path: "/register",
+        element: <Register />,
+      },
     ],
   },
-  {
-    // Login page route
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    // Register page route
-    path: "/register",
-    element: <Register />,
-  },
+  
 ]);
 
 // Main App component
