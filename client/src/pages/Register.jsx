@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Register = () => {
   // State to hold form data
@@ -109,6 +110,19 @@ const Register = () => {
             </button>
           </div>
         </form>
+
+        {/* Already Registered Section */}
+        <div className="text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

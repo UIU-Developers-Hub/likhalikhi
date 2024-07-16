@@ -130,7 +130,11 @@ const Navbar = () => {
             onClick={toggleDarkMode}
             className="focus:outline-none text-gray-600 dark:text-gray-300"
           >
-            {darkMode ? <FaSun /> : <FaMoon />}
+            {darkMode ? (
+              <FaSun className="text-yellow-500" />
+            ) : (
+              <FaMoon className="text-blue-500" />
+            )}
           </button>
         </div>
       </div>
