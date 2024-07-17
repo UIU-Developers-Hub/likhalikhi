@@ -2,6 +2,22 @@
 
 Welcome to likhalikhi! This is a blog application project currently under development.
 
+## Contents
+
+- [Tech Stack](#tech-stack)
+- [Current Status](#current-status)
+- [JWT Authentication](#jwt-authentication)
+  - [What is JWT?](#what-is-jwt)
+  - [How a JWT is Structured?](#how-a-jwt-is-structured)
+  - [How to Securely Store JWT on the Client Side?](#how-to-securely-store-jwt-on-the-client-side)
+  - [How to Invalidate a JWT Token](#how-to-invalidate-a-jwt-token)
+  - [JWT vs Session](#jwt-vs-session)
+  - [How JWT Works in likhalikhi](#how-jwt-works-in-likhalikhi)
+  - [JWT Setup](#jwt-setup)
+- [Database Models](#database-models)
+  - [User Model](#user-model)
+  - [Post Model](#post-model)
+
 ## Tech Stack
 
 - MongoDB
@@ -146,5 +162,74 @@ Choosing between JWT and sessions depends on the specific requirements of your a
      ```
      JWT_SECRET=your_jwt_secret
      ```
+
+## Database Models
+
+As i am configure my database in `Mongodb` we need `mongoose` for create our models and more easily.
+
+### User model
+
+```js
+import mongoose from "mongoose";
+
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      min: [3, "Username must be at least 3, got {VALUE}"],
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+    },
+    isActive: {
+      type: String,
+      required: [true, "Password is required"], //for custom message
+    },
+  },
+  { timestamps: true }
+);
+
+export const User = mongoose.model("User", userSchema);
+```
+
+### Post model
+
+```js
+import mongoose from "mongoose";
+
+const postSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    category: {
+      type: String,
+      required: true,
+    },
+    postImage: {
+      type: String,
+    },
+    createdBy: {
+      //who created this post
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  { timestamps: true }
+);
+
+export const Post = mongoose.model("Post", postSchema);
+```
 
 Feel free to explore the code and reach out if you have any questions or ideas!
