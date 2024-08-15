@@ -27,6 +27,7 @@ const uploadOnCloudinary = async (localFilePath) => {
       "\n and the url is ",
       response.url
     );
+    fs.unlinkSync(localFilePath); // remove the locally saved temporary file after successfully upload the image
     return response;
   } catch (err) {
     //not uploaded successfully -
