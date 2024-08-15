@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    username: {
+    fullname: {
       type: String,
       required: true,
       trim: true,
@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema(
     avater: {
       type: String, //Cloudinary URL
       required: true,
+    },
+    coverImage: {
+      type: String, //Cloudinary URL
+     
     },
     refreshToken: {
       type: String,
@@ -48,7 +52,7 @@ userSchema.pre("save", async function (next) {
     return next();
   }
 
-  this.password = bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
