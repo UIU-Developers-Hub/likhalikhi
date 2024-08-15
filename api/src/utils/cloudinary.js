@@ -36,13 +36,15 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-const uploadResult = await cloudinary.uploader
-  .upload(
-    "https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg",
-    {
-      public_id: "shoes",
-    }
-  )
-  .catch((error) => {
-    console.log(error);
-  });
+// const uploadResult = await cloudinary.uploader
+//   .upload(
+//     "https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg",
+//     {
+//       public_id: "shoes",
+//     }
+//   )
+//   .catch((error) => {
+//     console.log(error);
+//   });
+
+export { uploadOnCloudinary };

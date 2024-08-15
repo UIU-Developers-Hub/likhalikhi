@@ -169,7 +169,11 @@ As i am configure my database in `Mongodb` we need `mongoose` for create our mod
 
 ### User model
 
+in this model we add `bcrypt` for hash our password and `jsonwebtoken` for geting access token and refresh token so that we can save it on our cookie or some places. so that we can easily get our necessary information.
+
 ```js
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
@@ -179,6 +183,8 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
+      index: true,
       min: [3, "Username must be at least 3, got {VALUE}"],
     },
     email: {
@@ -186,22 +192,78 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
-    isActive: {
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true,
+    },
+    password: {
       type: String,
       required: [true, "Password is required"], //for custom message
+    },
+    avater: {
+      type: String, //Cloudinary URL
+      required: true,
+    },
+    refreshToken: {
+      type: String,
     },
   },
   { timestamps: true }
 );
+
+//this pre is a middleware it works like before the data save/or whatever i do in this schema.
+// we can run a function . there . "save" is for ... before save it will call not update or other things
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+
+  this.password = bcrypt.hash(this.password, 10);
+  next();
+});
+
+//creating custom method [we named it "isPasswordCorrect"]
+userSchema.methods.isPasswordCorrect = async function (password) {
+  //logic for checking
+  return await bcrypt.compare(password, this.password);
+};
+
+userSchema.methods.generateAccessToken = function (password) {
+  return jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      username: this.username,
+      fullname: this.fullname,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+  );
+};
+userSchema.methods.generateRefreshToken = function (password) {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+  );
+};
 
 export const User = mongoose.model("User", userSchema);
 ```
 
 ### Post model
 
+in this post model we add `mongoose-aggregate-paginate-v2` to do some advance command operation in mongodb database.
+
 ```js
 import mongoose from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const postSchema = new mongoose.Schema(
   {
@@ -218,7 +280,11 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
     postImage: {
-      type: String,
+      type: String, //cloudinary url
+    },
+    isPublished: {
+      type: Boolean,
+      default: true,
     },
     createdBy: {
       //who created this post
@@ -228,6 +294,8 @@ const postSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+postSchema.plugin(mongooseAggregatePaginate);
 
 export const Post = mongoose.model("Post", postSchema);
 ```

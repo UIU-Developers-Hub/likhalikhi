@@ -37,6 +37,8 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-md">
+      {" "}
+      {/* here we write whole navbar css*/}
       <div className="container mx-auto px-4 py-2 flex justify-between items-center">
         {/* Logo and Site Name */}
         <div className="flex items-center space-x-4">
@@ -47,7 +49,7 @@ const Navbar = () => {
         </div>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex space-x-4">
+        <div className="hidden lg:flex space-x-4">
           <a
             href="/"
             className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
@@ -87,7 +89,7 @@ const Navbar = () => {
         </div>
 
         {/* Search Box */}
-        <div className="flex items-center space-x-2">
+        <div className="hidden md:flex items-center space-x-2">
           <input
             type="text"
             placeholder="Search..."
@@ -107,23 +109,23 @@ const Navbar = () => {
         {/* User Links */}
         <div className="flex items-center space-x-4">
           <a
-            href="/login"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Login
-          </a>
-          <a
             href="/write"
             className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
           >
             Write
           </a>
           <a
+            href="/login"
+            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+          >
+            Login
+          </a>
+          {/* <a
             href="/profile"
             className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
           >
             Profile
-          </a>
+          </a> */}
 
           {/* Dark Mode Toggle */}
           <button
