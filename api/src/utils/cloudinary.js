@@ -1,17 +1,28 @@
 import { v2 as cloudinary } from "cloudinary";
-
+// import dotenv from "dotenv";
 import fs from "fs";
-
+// dotenv.config(); // Ensure this is at the top
+// Configuration
 // Configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET, // Click 'View Credentials' below to copy your API secret
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+// cloudinary.config({
+//   cloud_name: "dbqyok2i8",
+//   api_key: "289577841652863",
+//   api_secret: "P3eD80mw3CX-__olEF_zF4YcKCI",
+// });
 
 // Upload an image
 
 const uploadOnCloudinary = async (localFilePath) => {
+  console.log("Uploading file on cloudinary...");
+  console.log(process.env.CLOUDINARY_CLOUD_NAME);
+  console.log(process.env.CLOUDINARY_API_KEY);
+  console.log(process.env.CLOUDINARY_API_SECRET);
+
   try {
     if (!localFilePath) {
       return null;
@@ -36,16 +47,5 @@ const uploadOnCloudinary = async (localFilePath) => {
     return null;
   }
 };
-
-// const uploadResult = await cloudinary.uploader
-//   .upload(
-//     "https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg",
-//     {
-//       public_id: "shoes",
-//     }
-//   )
-//   .catch((error) => {
-//     console.log(error);
-//   });
 
 export { uploadOnCloudinary };

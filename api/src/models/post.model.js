@@ -1,36 +1,21 @@
 import mongoose from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const postSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    category: {
-      type: String,
-      required: true,
-    },
-    postImage: {
-      type: String, //cloudinary url
-    },
-    isPublished: {
-      type: Boolean,
-      default: true,
-    },
-    createdBy: {
-      //who created this post
+    title: { type: String, required: true, trim: true },
+    content: { type: String, required: true },
+    author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
+    image: { type: String }, // URL for the post image
+    tags: [{ type: String }], // Tags for categorization
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    reactions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reaction" }],
   },
   { timestamps: true }
 );
 
-postSchema.plugin(mongooseAggregatePaginate);
-
-export const Post = mongoose.model("Post", postSchema);
+const Post = mongoose.model("Post", postSchema);
+export default Post;

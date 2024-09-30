@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { FaMoon, FaSearch, FaSun } from "react-icons/fa";
+import React, { useContext, useEffect, useState } from "react";
+import { FiEdit2, FiLogOut, FiMoon, FiSun } from "react-icons/fi"; // Import icons
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/authContext";
+import { logout } from "../services/authenticationsServices";
 
 const Navbar = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const { user, logoutWithContext } = useContext(AuthContext);
   const [darkMode, setDarkMode] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     // Check local storage for dark mode preference
     const savedDarkMode = localStorage.getItem("darkMode") === "true";
@@ -14,131 +17,87 @@ const Navbar = () => {
     }
   }, []);
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const searchHandle = () => {
-    // Perform the search logic here
-    console.log("Searching for:", searchQuery);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      searchHandle();
-    }
-  };
-
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     localStorage.setItem("darkMode", !darkMode);
     document.documentElement.classList.toggle("dark");
   };
 
+  const handleLogout = () => {
+    logoutWithContext();
+    logout();
+  };
+
+  const handleProfileClick = () => {
+    if (user && user._id) {
+      navigate(`/profile/${user._id}`);
+    }
+  };
+
+  const getDisplayName = (fullName) => {
+    if (!fullName) return "";
+    const nameParts = fullName.split(" ");
+    let n = nameParts.length;
+    const lastName = nameParts[n - 1];
+    const firstName = nameParts[0];
+
+    // Ensure the name displayed is at least 3 characters long
+    return firstName.length >= 3 ? firstName : lastName;
+  };
+
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-md">
-      {" "}
-      {/* here we write whole navbar css*/}
-      <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-        {/* Logo and Site Name */}
-        <div className="flex items-center space-x-4">
-          <img src="../../public/logo.jpg" alt="Logo" className="h-8 w-8" />
-          <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Likhalikhi
-          </span>
-        </div>
+    <nav className="bg-cusLightBG dark:bg-cusLightDarkBG px-4 py-2 flex justify-between items-center">
+      <Link
+        to="/"
+        className="text-xl font-bold text-cusPrimaryColor dark:text-cusSecondaryColor"
+      >
+        My Blog
+      </Link>
+      <div className="flex items-center space-x-4">
+        {user ? (
+          <div className="flex items-center space-x-2">
+            <span
+              className="text-cusPrimaryColor dark:text-cusSecondaryColor cursor-pointer capitalize"
+              onClick={handleProfileClick}
+            >
+              {getDisplayName(user.fullname)}
+            </span>
+            <button
+              onClick={() => navigate("/create-post")}
+              className=" flex text-cusSecondaryColor dark:text-cusSecondaryColor hover:text-cusSecondaryLightColor "
+            >
+              <p className="hidden md:block">Write</p>
+              <FiEdit2 className="md:hidden" size={20} />
+            </button>
 
-        {/* Navigation Links */}
-        <div className="hidden lg:flex space-x-4">
-          <a
-            href="/"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Home
-          </a>
-          <a
-            href="/category/science"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Science
-          </a>
-          <a
-            href="/category/technology"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Technology
-          </a>
-          <a
-            href="/category/food"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Food
-          </a>
-          <a
-            href="/category/fashion"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Fashion
-          </a>
-          <a
-            href="/category/lifestyle"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Lifestyle
-          </a>
-        </div>
-
-        {/* Search Box */}
-        <div className="hidden md:flex items-center space-x-2">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyPress={handleKeyPress}
-            className="px-4 py-1 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-          />
+            {/* Show logout text on desktop, icons on mobile */}
+            <button
+              onClick={handleLogout}
+              className="text-cusSecondaryColor dark:text-cusSecondaryColor hover:text-cusSecondaryLightColor hidden md:block"
+            >
+              Logout
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-cusSecondaryColor dark:text-cusSecondaryColor hover:text-cusSecondaryLightColor  md:hidden"
+            >
+              <FiLogOut size={20} />
+            </button>
+          </div>
+        ) : (
           <button
-            onClick={searchHandle}
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none"
-          >
-            <FaSearch />
-          </button>
-        </div>
-
-        {/* User Links */}
-        <div className="flex items-center space-x-4">
-          <a
-            href="/write"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Write
-          </a>
-          <a
-            href="/login"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+            onClick={() => navigate("/login")}
+            className="text-cusSecondaryColor dark:text-cusSecondaryColor hover:text-cusSecondaryLightColor"
           >
             Login
-          </a>
-          {/* <a
-            href="/profile"
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Profile
-          </a> */}
-
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
-            className="focus:outline-none text-gray-600 dark:text-gray-300"
-          >
-            {darkMode ? (
-              <FaSun className="text-yellow-500" />
-            ) : (
-              <FaMoon className="text-blue-500" />
-            )}
           </button>
-        </div>
+        )}
+        <button
+          onClick={toggleDarkMode}
+          className="text-cusPrimaryColor dark:text-cusSecondaryColor hover:text-cusSecondaryColor"
+        >
+          {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+        </button>
       </div>
     </nav>
   );

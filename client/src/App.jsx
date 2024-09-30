@@ -1,69 +1,42 @@
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-import Footer from "./components/Footer";
-import Navbar from "./components/Navbar";
+import React from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import Layout from "./Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Posts from "./pages/Posts";
+import Profile from "./pages/Profile";
 import Register from "./pages/Register";
-import Single from "./pages/Single";
-import Write from "./pages/Write";
+import SinglePost from "./pages/SinglePost";
+import VerifyEmail from "./pages/VerifyEmail"; // Adjust the path as needed
+import WritePost from "./pages/WritePost";
+import PrivateRoute from "./utils/PrivateRoute";
 
-// Layout component that includes the Navbar and Footer
-const Layout = () => {
-  return (
-    <>
-      {/* Add Navbar component */}
-      <Navbar />
-      {/* Outlet is a placeholder for the nested route components */}
-      <Outlet />
-      {/* Add Footer component */}
-      <Footer />
-    </>
-  );
-};
-
-// Define the routes using createBrowserRouter
-const router = createBrowserRouter([
-  {
-    // Base route with a layout
-    path: "/",
-    element: <Layout />,
-    children: [
-      {
-        // Home page route
-        path: "/",
-        element: <Home />,
-      },
-      {
-        // Single post page route with dynamic parameter ":id"
-        path: "/post/:id",
-        element: <Single />,
-      },
-      {
-        // Write post page route
-        path: "/write",
-        element: <Write />,
-      },
-      {
-        // Login page route
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        // Register page route
-        path: "/register",
-        element: <Register />,
-      },
-    ],
-  },
-  
-]);
-
-// Main App component
 const App = () => {
   return (
-    <div>
-      {/* Provide the router to the application */}
-      <RouterProvider router={router} />
+    <div className="bg-white dark:bg-cusDarkBG min-h-screen">
+      <Router>
+        <Routes>
+          {/* Routes outside of the main layout */}
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+
+          {/* Main layout with nested routes */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="posts" element={<Posts />} />
+            <Route path="post/:id" element={<SinglePost />} />
+            <Route
+              path="create-post"
+              element={<PrivateRoute element={<WritePost />} />}
+            />
+            <Route
+              path="profile/:id"
+              element={<PrivateRoute element={<Profile />} />}
+            />
+          </Route>
+        </Routes>
+      </Router>
     </div>
   );
 };

@@ -1,128 +1,195 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  register,
+  resendVerificationEmail,
+} from "../services/authenticationsServices.js";
+import { notify } from "../utils/notify";
 
 const Register = () => {
-  // State to hold form data
   const [formData, setFormData] = useState({
-    username: "",
+    fullname: "",
     email: "",
     password: "",
-    image: null,
   });
+  const [sentUserData, setSentUserData] = useState({});
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [timer, setTimer] = useState(30); // 3 minutes in seconds
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
+  const [isLoading, setLoading] = useState(false); // New loading state
 
-  // Handle input change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle image upload
-  const handleImageChange = (e) => {
-    setFormData({
-      ...formData,
-      image: e.target.files[0],
-    });
-  };
-
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Perform form submission logic here (e.g., send data to backend)
-    console.log(formData);
+    setLoading(true); // Start loading
+    try {
+      const response = await register(formData);
+      if (response?.data?.success) {
+        notify(response?.data?.message, "success");
+        setIsRegistered(true);
+        setSentUserData({ ...formData });
+        setFormData({ fullname: "", email: "", password: "" });
+        // Start the timer
+        startTimer(); // for resend email
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        notify(error.response.data.message, "failure");
+      } else {
+        notify("An unexpected error occurred. Please try again.", "failure");
+      }
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  const startTimer = () => {
+    setIsResendDisabled(true);
+    const countdown = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdown);
+          setIsResendDisabled(false);
+          return 30; // Reset timer to 3 minutes for the next round
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleResend = async () => {
+    //%%%%%%%%%%%%later on%%%%%%%%%%%%%%%%%%
+    //Here we will handle the resend verification link operation later on
+    try {
+      const res = await resendVerificationEmail(sentUserData);
+      notify(res.message, "success");
+    } catch (error) {
+      console.log(error);
+      notify(error.message, "failure");
+    }
+    setTimer(30);
+    startTimer();
+    setIsResendDisabled(true);
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100">
-          Register
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Username:
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-gray-100"
-            />
-          </div>
-
-          {/* Email field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Email:
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-gray-100"
-            />
-          </div>
-
-          {/* Password field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Password:
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-gray-100"
-            />
-          </div>
-
-          {/* Image upload field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Profile Image:
-            </label>
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-700 file:text-blue-700 dark:file:text-gray-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-600"
-            />
-          </div>
-
-          {/* Submit button */}
-          <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900"
-            >
+    <div className="bg-cusLightBG dark:bg-cusDarkBG min-h-screen flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-cusLightDarkBG p-6 rounded-lg shadow-md w-full max-w-md">
+        <ToastContainer />
+        {!isRegistered ? (
+          <>
+            <h2 className="text-2xl font-bold mb-4 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
               Register
+            </h2>
+
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="fullname"
+                  value={formData.fullname}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded dark:bg-cusDarkBG  text-cusPrimaryColor dark:text-cusSecondaryLightColor border-cusPrimaryColor dark:border-cusSecondaryColor focus:outline-none focus:ring-2 focus:ring-cusPrimaryColor"
+                  placeholder="Enter your fullname"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded dark:bg-cusDarkBG  text-cusPrimaryColor dark:text-cusSecondaryLightColor border-cusPrimaryColor dark:border-cusSecondaryColor focus:outline-none focus:ring-2 focus:ring-cusPrimaryColor"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded dark:bg-cusDarkBG  text-cusPrimaryColor dark:text-cusSecondaryLightColor border-cusPrimaryColor dark:border-cusSecondaryColor focus:outline-none focus:ring-2 focus:ring-cusPrimaryColor"
+                  placeholder="Enter your password"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full p-2 bg-cusPrimaryColor text-white rounded hover:bg-opacity-90 dark:bg-cusSecondaryColor"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex justify-center items-center">
+                    <span>Registering</span>
+                    <div className="ml-2 flex space-x-1">
+                      <div className="w-2.5 h-2.5 bg-white rounded-full animate-bounce-dot"></div>
+                      <div className="w-2.5 h-2.5 bg-white rounded-full animate-bounce-dot delay-150"></div>
+                      <div className="w-2.5 h-2.5 bg-white rounded-full animate-bounce-dot delay-300"></div>
+                    </div>
+                  </div>
+                ) : (
+                  "Register"
+                )}
+              </button>
+            </form>
+
+            <p className="text-sm mt-4 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+              Already have an account?
+              <Link
+                to="/login"
+                className="text-cusSecondaryColor dark:text-cusSecondaryLightColor ml-1 underline"
+              >
+                Login
+              </Link>
+            </p>
+          </>
+        ) : (
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+              Check Your Email
+            </h2>
+            <p className="text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+              We&apos;ve sent a verification link to your email. Please check
+              your inbox and spam folder.
+            </p>
+            <button
+              onClick={handleResend}
+              disabled={isResendDisabled}
+              className={`mt-4 p-2 ${
+                isResendDisabled
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-cusPrimaryColor hover:bg-opacity-90 dark:bg-cusSecondaryColor"
+              } text-white rounded`}
+            >
+              {isResendDisabled
+                ? `Resend Link in ${Math.floor(timer / 60)}:${
+                    timer % 60 < 10 ? `0${timer % 60}` : timer % 60
+                  }`
+                : "Resend Verification Link"}
             </button>
           </div>
-        </form>
-
-        {/* Already Registered Section */}
-        <div className="text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Login
-            </Link>
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );

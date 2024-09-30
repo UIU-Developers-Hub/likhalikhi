@@ -1,18 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-
+import { ApiError } from "../utils/ApiError.js";
 const userSchema = new mongoose.Schema(
   {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      index: true,
-      min: [3, "Username must be at least 3, got {VALUE}"],
-    },
+    fullname: { type: String, required: true, trim: true },
     email: {
       type: String,
       required: true,
@@ -20,67 +12,60 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    fullname: {
-      type: String,
-      required: true,
-      trim: true,
-      index: true,
-    },
-    password: {
-      type: String,
-      required: [true, "Password is required"], //for custom message
-    },
-    avater: {
-      type: String, //Cloudinary URL
-      required: true,
-    },
-    coverImage: {
-      type: String, //Cloudinary URL
-    },
-    refreshToken: {
-      type: String,
-    },
+    password: { type: String, required: [true, "password is required"] },
+    profilePic: { type: String }, // cloudinary URL
+    isVerified: { type: Boolean, default: false },
+    verificationToken: { type: String },
+    refreshToken: { type: String },
   },
   { timestamps: true }
 );
 
-//this pre is a middleware it works like before the data save/or whatever i do in this schema.
-// we can run a function . there . "save" is for ... before save it will call not update or other things
+//Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
-    return next();
+    next();
   }
-
-  this.password = await bcrypt.hash(this.password, 10);
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 //creating custom method [we named it "isPasswordCorrect"]
-userSchema.methods.isPasswordCorrect = async function (password) {
-  //logic for checking
-  return await bcrypt.compare(password, this.password);
+userSchema.methods.isPasswordCorrect = async function (userPassword) {
+  return await bcrypt.compare(userPassword, this.password);
 };
 
-userSchema.methods.generateAccessToken = function (password) {
-  return jwt.sign(
-    {
-      _id: this._id,
-      email: this.email,
-      username: this.username,
-      fullname: this.fullname,
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-  );
-};
-userSchema.methods.generateRefreshToken = function (password) {
-  return jwt.sign(
-    {
-      _id: this._id,
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
-  );
+userSchema.methods.generateAccessToken = function () {
+  try {
+    return jwt.sign(
+      {
+        _id: this._id,
+        email: this.email,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    );
+  } catch (error) {
+    console.error("Error generating access token:", error);
+    throw new ApiError(500, "Failed to generate access token");
+  }
 };
 
-export const User = mongoose.model("User", userSchema);
+userSchema.methods.generateRefreshToken = function () {
+  try {
+    return jwt.sign(
+      {
+        _id: this._id,
+      },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+    );
+  } catch (error) {
+    console.error("Error generating refresh token:", error);
+    throw new ApiError(500, "Failed to generate refresh token");
+  }
+};
+
+const User = mongoose.model("User", userSchema);
+export default User;

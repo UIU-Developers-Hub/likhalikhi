@@ -1,89 +1,115 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { AuthContext } from "../context/authContext.jsx";
+import { notify } from "../utils/notify";
 
 const Login = () => {
-  // State to hold form data
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
+  const [error, setError] = useState(""); // State to handle error messages
+  const [isLoading, setIsLoading] = useState(false); // State to handle loading state
+  const navigate = useNavigate();
+  const { loginWithContext } = useContext(AuthContext);
 
-  // Handle input change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Perform login logic here (e.g., send data to backend)
-    console.log(formData);
+    setIsLoading(true); // Start loading
+    try {
+      const response = await loginWithContext(formData); // Call the login service
+      if (response.data.success) {
+        console.log("Login success");
+        console.log(response.data.data);
+        notify(response?.data?.message, "info");
+        navigate("/?source=login"); // Redirect to homepage on success
+      } else {
+        setError(response.data.message); // Set error message
+      }
+    } catch (err) {
+      // setError("Login failed. Please check your credentials.");
+      // notify(err.message, "failure");
+      if (err?.response?.data?.message && err?.response?.status === 401) {
+        console.log("error-->", err);
+        console.log("error data-->", err?.response?.data);
+        notify(err?.response?.data?.message, "info");
+      } else {
+        notify(err?.response?.data?.message, "failure");
+      }
+    } finally {
+      setIsLoading(false); // Stop loading
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100">
+    <div className="bg-cusLightBG dark:bg-cusDarkBG min-h-screen flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-cusLightDarkBG p-6 rounded-lg shadow-md w-full max-w-md">
+        <ToastContainer />
+        <h2 className="text-2xl font-bold mb-4 text-cusPrimaryColor  dark:text-cusSecondaryLightColor">
           Login
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Username:
+
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+              Email
             </label>
             <input
-              type="text"
-              name="username"
-              value={formData.username}
+              type="email"
+              name="email"
+              className="w-full p-2 border rounded dark:bg-cusDarkBG  text-cusPrimaryColor dark:text-cusSecondaryLightColor border-cusPrimaryColor dark:border-cusSecondaryColor focus:outline-none focus:ring-2 focus:ring-cusPrimaryColor"
+              placeholder="Enter your email"
               onChange={handleChange}
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-gray-100"
             />
           </div>
 
-          {/* Password field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Password:
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+              Password
             </label>
             <input
               type="password"
               name="password"
-              value={formData.password}
+              className="w-full p-2 border rounded dark:bg-cusDarkBG  text-cusPrimaryColor dark:text-cusSecondaryLightColor border-cusPrimaryColor dark:border-cusSecondaryColor focus:outline-none focus:ring-2 focus:ring-cusPrimaryColor"
+              placeholder="Enter your password"
               onChange={handleChange}
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-gray-100"
             />
           </div>
-
-          {/* Submit button */}
-          <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900"
-            >
-              Login
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full p-2 bg-cusPrimaryColor text-white rounded hover:bg-opacity-90 dark:bg-cusSecondaryColor"
+            disabled={isLoading} // Disable button while loading
+          >
+            {isLoading ? (
+              <div className="flex justify-center items-center">
+                <div className="w-5 h-5 border-4 border-t-transparent border-white rounded-full animate-spin-slow"></div>
+                <span className="ml-2">Logging in...</span>
+              </div>
+            ) : (
+              "Login"
+            )}
+          </button>
         </form>
 
-        {/* Not Registered Section */}
-        <div className="text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Don&apos;t have an account?{" "}
-            <Link
-              to="/register"
-              className="text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Register
-            </Link>
-          </p>
-        </div>
+        <p className="text-sm mt-4 text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+          Don&apos;t have an account?
+          <Link
+            to="/register"
+            className="text-cusSecondaryColor dark:text-cusSecondaryLightColor ml-1 underline"
+          >
+            Register
+          </Link>
+        </p>
       </div>
     </div>
   );
