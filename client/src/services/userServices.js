@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/v1/";
+const API_URL = "http://localhost:5001/api/v1/";
 // const API_URL = "https://blog-app-eta-orcin.vercel.app/api/v1/";
 
 export const updateUserData = async (userId, formdata) =>
