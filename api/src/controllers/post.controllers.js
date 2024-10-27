@@ -7,13 +7,15 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
-// Create a new post
 export const createPost = async (req, res, next) => {
   try {
     const { title, content, tags } = req.body;
     const author = req.user._id; // Assuming user info is available in req.user
-    // const author = "66c0af684ad4a052f2aaf590";
-    console.log("request . is ", req);
+
+    console.log("Request body:", req.body);
+    console.log("Request user:", req.user);
+    console.log("Request file:", req.file);
+
     let image;
     if (req.file && req.file.path) {
       image = await uploadOnCloudinary(req.file.path);
@@ -24,12 +26,13 @@ export const createPost = async (req, res, next) => {
       throw new ApiError(400, "Image is required");
     }
 
-    console.log(image);
+    console.log("Uploaded image:", image);
+
     const post = new Post({
       title,
       content,
-      image,
-      tags,
+      image: image.secure_url, // Ensure you are saving the correct field
+      tags: JSON.parse(tags), // Parse tags if they are sent as a JSON string
       author,
     });
 
@@ -39,47 +42,10 @@ export const createPost = async (req, res, next) => {
       data: post,
     });
   } catch (error) {
+    console.error("Error creating post:", error);
     next(new ApiError(400, "Failed to create post"));
   }
 };
-
-// export const createPost = asyncHandler(async (req, res) => {
-//   const { title, content } = req.body;
-
-//   // const author = "66c8e298d5bdf18dacdcd7c8"; // Replace with dynamic author ID
-//   const author = req.user._id; // Assuming user info is available in req.user
-//   // Parse the tags JSON string back into an array
-//   let parsedTags = [];
-//   try {
-//     parsedTags = JSON.parse(tags);
-//   } catch (error) {
-//     throw new ApiError(400, "Invalid tags format");
-//   }
-
-//   let image;
-//   if (req.file && req.file.path) {
-//     const uploadResponse = await uploadOnCloudinary(req.file.path);
-//     if (!uploadResponse) {
-//       throw new ApiError(500, "Failed to upload image");
-//     }
-//     image = uploadResponse.secure_url; // Save only the secure URL or other required field
-//   } else {
-//     throw new ApiError(408, "Image is required");
-//   }
-
-//   const post = new Post({
-//     title: title,
-//     content: content,
-//     author: author,
-//   });
-
-//   if (!post) {
-//     throw new ApiError(400, "Failed to create post");
-//   }
-
-//   await post.save();
-//   res.status(201).json(new ApiResponse(201, post, "Post created successfully"));
-// });
 
 // Get all posts
 export const getPosts = asyncHandler(async (req, res, next) => {
@@ -256,8 +222,7 @@ export const updateComment = asyncHandler(async (req, res) => {
   console.log("update comment is called");
   const { commentId } = req.params;
   const { content } = req.body;
-  // const userId = req.user._id;
-  const userId = "66c0af684ad4a052f2aaf590";
+  const userId = req.user._id;
 
   // Find the comment by its ID
   const comment = await Comment.findById(commentId);
