@@ -1,7 +1,8 @@
-import { format } from "date-fns"; // To format the date
+import { format } from "date-fns";
+import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
-import { AiFillHeart } from "react-icons/ai"; // For love icon
-import { FaRegComment } from "react-icons/fa"; // For comment icon
+import { AiFillHeart } from "react-icons/ai";
+import { FaRegComment } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getPosts } from "../services/postServices";
 
@@ -20,8 +21,9 @@ const fixedTags = [
 
 const truncateText = (text, wordLimit) => {
   const words = text.split(" ");
-  if (words.length <= wordLimit) return text;
-  return words.slice(0, wordLimit).join(" ") + "...";
+  return words.length <= wordLimit
+    ? text
+    : words.slice(0, wordLimit).join(" ") + "...";
 };
 
 const Posts = () => {
@@ -41,11 +43,8 @@ const Posts = () => {
     fetchPosts();
   }, []);
 
-  const handleTagClick = (tag) => {
-    setSelectedTag(tag);
-  };
+  const handleTagClick = (tag) => setSelectedTag(tag);
 
-  // Filter posts based on the selected tag
   const filteredPosts = selectedTag
     ? posts.filter((post) =>
         post.tags
@@ -55,19 +54,26 @@ const Posts = () => {
     : posts;
 
   return (
-    <div className="p-4 max-w-7xl mx-auto">
+    <motion.div
+      className="p-4 max-w-7xl mx-auto"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <h1 className="text-3xl text-cusPrimaryColor dark:text-cusSecondaryLightColor font-bold mb-6">
         All Posts
       </h1>
+
       <div className="mb-4">
         <h2 className="text-xl text-cusSecondaryColor font-semibold mb-2">
           Filter by Tag:
         </h2>
         <div className="flex flex-wrap gap-2">
           {fixedTags.map((tag) => (
-            <button
+            <motion.button
               key={tag}
               onClick={() => setSelectedTag(tag)}
+              whileHover={{ scale: 1.05 }}
               className={`px-4 py-2 rounded-lg ${
                 selectedTag === tag
                   ? "bg-cusPrimaryColor text-white"
@@ -75,26 +81,29 @@ const Posts = () => {
               }`}
             >
               {tag}
-            </button>
+            </motion.button>
           ))}
-          <button
+          <motion.button
             onClick={() => setSelectedTag("")}
+            whileHover={{ scale: 1.05 }}
             className="px-4 py-2 rounded-lg bg-cusSecondaryColor text-white"
           >
             Clear Filter
-          </button>
+          </motion.button>
         </div>
       </div>
 
       <div className="space-y-8">
         {filteredPosts.map((post, index) => (
-          <div
+          <motion.div
             key={post._id}
             className={`flex flex-col md:flex-row gap-4 bg-cusLightBG dark:bg-cusLightDarkBG p-6 rounded-lg ${
               index % 2 === 0 ? "md:flex-row-reverse" : "md:flex-row"
             }`}
+            initial={{ opacity: 0, x: index % 2 === 0 ? 100 : -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            {/* First Section: Image with Overlapping Date, Reactions, and Comments */}
             <div className="relative md:w-2/5 my-2 md:my-6">
               <img
                 src={post.image}
@@ -114,10 +123,9 @@ const Posts = () => {
               </div>
             </div>
 
-            {/* Second Section: Title, Author, Content, Tags */}
             <div className="md:w-3/5 flex flex-col justify-between">
               <div>
-                <h2 className="text-2xl font-semibold  text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+                <h2 className="text-2xl font-semibold text-cusPrimaryColor dark:text-cusSecondaryLightColor">
                   {post.title}
                 </h2>
                 <Link
@@ -136,29 +144,30 @@ const Posts = () => {
                 </h3>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {post.tags.map((tag) => (
-                    <span
-                      onClick={() => {
-                        handleTagClick(tag);
-                      }}
+                    <motion.span
+                      onClick={() => handleTagClick(tag)}
                       key={tag}
-                      className="px-3 py-1 bg-cusSecondaryLightColor text-cusDarkBG  cursor-pointer rounded-full"
+                      whileHover={{ scale: 1.05 }}
+                      className="px-3 py-1 bg-cusSecondaryLightColor text-cusDarkBG cursor-pointer rounded-full"
                     >
                       {tag}
-                    </span>
+                    </motion.span>
                   ))}
                 </div>
               </div>
-              <Link
-                to={`/post/${post._id}`}
-                className="mt-4 bg-cusPrimaryColor text-white py-2 px-4 rounded text-center w-32"
-              >
-                Read More
-              </Link>
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <Link
+                  to={`/post/${post._id}`}
+                  className="mt-4 bg-cusPrimaryColor text-white py-2 px-4 rounded text-center w-32"
+                >
+                  Read More
+                </Link>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

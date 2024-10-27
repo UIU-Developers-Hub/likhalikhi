@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from "date-fns"; // For time ago formatting
+import { motion } from "framer-motion"; // Import motion
 import React, { useContext, useEffect, useState } from "react";
 import { FaEdit, FaHeart, FaTrashAlt } from "react-icons/fa"; // Import icons
 import { Link, useParams } from "react-router-dom";
@@ -127,19 +128,42 @@ const SinglePost = () => {
   );
   const reactionCount = reactions.length;
 
+  // Animation variants
+  const postAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
+  const commentAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (index) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, delay: index * 0.1 },
+    }),
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6 my-6 bg-cusLightBG dark:bg-cusLightDarkBG rounded-lg shadow-lg flex flex-col lg:flex-row gap-6">
       {post && (
         <>
-          {/* Main Post Content */}
           <div className="flex-1">
-            <h1 className="text-2xl md:text-5xl font-extrabold mb-6 text-center text-cusPrimaryColor">
+            {/* Main Post Content */}
+            <motion.h1
+              className="text-2xl md:text-5xl font-extrabold mb-6 text-center text-cusPrimaryColor"
+              initial="hidden"
+              animate="visible"
+              variants={postAnimation}
+            >
               {post.title}
-            </h1>
-            <img
+            </motion.h1>
+            <motion.img
               src={post.image}
               alt={post.title}
               className="w-full h-auto rounded-lg shadow-lg mb-6"
+              initial="hidden"
+              animate="visible"
+              variants={postAnimation}
             />
             <div className="flex items-center gap-4 mb-6">
               <img
@@ -161,10 +185,15 @@ const SinglePost = () => {
                 </p>
               </div>
             </div>
-            <p className="text-lg leading-relaxed text-gray-700 dark:text-cusSecondaryColor mb-8">
+            <motion.p
+              className="text-lg leading-relaxed text-gray-700 dark:text-cusSecondaryColor mb-8"
+              initial="hidden"
+              animate="visible"
+              variants={postAnimation}
+            >
               {post.content}
-            </p>
-            <div className="flex items-center  mb-8">
+            </motion.p>
+            <div className="flex items-center mb-8">
               <button
                 onClick={handleAddOrRemoveReaction}
                 className="flex items-center text-3xl p-2 rounded-lg"
@@ -183,10 +212,14 @@ const SinglePost = () => {
               Comments
             </h2>
             <ul className="space-y-6 mb-8">
-              {comments.map((comment) => (
-                <li
+              {comments.map((comment, index) => (
+                <motion.li
                   key={comment._id}
                   className="bg-white dark:bg-cusDarkBG p-6 rounded-lg shadow-md flex flex-col gap-4"
+                  initial="hidden"
+                  animate="visible"
+                  variants={commentAnimation}
+                  custom={index}
                 >
                   {editCommentId === comment._id ? (
                     <>
@@ -234,7 +267,7 @@ const SinglePost = () => {
                               }
                             />
                             <FaTrashAlt
-                              className="cursor-pointer hover:text-red-500"
+                              className="cursor-pointer hover:text-cusPrimaryColor"
                               onClick={() => openModal(comment._id)}
                             />
                           </div>
@@ -242,24 +275,22 @@ const SinglePost = () => {
                       </div>
                     </>
                   )}
-                </li>
+                </motion.li>
               ))}
             </ul>
-            <div className="bg-white dark:bg-cusDarkBG p-6 rounded-lg shadow-md">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="w-full p-4 border dark:text-cusSecondaryLightColor border-gray-300 dark:border-gray-700 dark:bg-cusLightDarkBG rounded-lg focus:outline-none focus:ring-2 focus:ring-cusPrimaryColor"
-                rows="3"
-                placeholder="Add a comment..."
-              />
-              <button
-                onClick={handleAddComment}
-                className="w-full bg-cusPrimaryColor text-white px-4 py-2 rounded-lg mt-4 hover:bg-cusSecondaryColor transition duration-300"
-              >
-                Add Comment
-              </button>
-            </div>
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="w-full p-4 border dark:text-white border-gray-300 dark:bg-cusLightDarkBG dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cusPrimaryColor"
+              rows="3"
+              placeholder="Add a comment..."
+            />
+            <button
+              onClick={handleAddComment}
+              className="bg-cusPrimaryColor text-white px-4 py-2 rounded-lg hover:bg-cusSecondaryColor transition duration-300 mt-4"
+            >
+              Comment
+            </button>
           </div>
           {/* You May Like Component on the Left */}
           <div className="w-full lg:w-1/3">

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import ConfirmationModal from "../components/ConfirmationModal";
@@ -9,30 +10,21 @@ const Profile = () => {
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
-  const isCurrentUser = user && id === user._id; // Check if viewing own profile
+  const isCurrentUser = user && id === user._id;
   const [editMode, setEditMode] = useState(false);
-  // const [profileData, setProfileData] = useState({
-  //   fullname: user ? user.fullname : "",
-  //   email: user ? user.email : "",
-  // });
-  // const [profilePic, setProfilePic] = useState(
-  //   user && user.profilePic ? user.profilePic : "/profilePicture.jpg"
-  // );
   const [profileData, setProfileData] = useState({
     fullname: "",
     email: "",
   });
   const [profilePic, setProfilePic] = useState("/profilePicture.jpg");
   const [posts, setPosts] = useState([]);
-
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal
-  const [postIdToDelete, setPostIdToDelete] = useState(""); // State to store post ID to delete
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [postIdToDelete, setPostIdToDelete] = useState("");
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const res = await getUserProfile(id);
-        console.log("Profile Data: ", res.data.data);
         setProfileData({
           fullname: res.data.data.fullname,
           email: res.data.data.email,
@@ -74,7 +66,6 @@ const Profile = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-
     const formData = new FormData();
     formData.append("fullname", profileData.fullname);
 
@@ -91,11 +82,9 @@ const Profile = () => {
           fullname: response.data.data.fullname,
         });
       }
-
       setProfilePic(response.data.data.profilePic);
       setProfileData({ ...profileData, fullname: response.data.data.fullname });
-      console.log("successfully updated data");
-      console.log(response);
+      console.log("Successfully updated data");
     } catch (err) {
       console.log(err);
     }
@@ -111,30 +100,34 @@ const Profile = () => {
   const handleConfirmDelete = async () => {
     try {
       await deletePost(postIdToDelete);
-      setPosts(posts.filter((post) => post._id !== postIdToDelete)); // Remove the deleted post from the state
-
+      setPosts(posts.filter((post) => post._id !== postIdToDelete));
       setIsModalOpen(false);
       console.log("Post deleted successfully");
     } catch (err) {
       console.log("Failed to delete post: ", err);
     }
   };
+
   const handleCancelDelete = () => {
     setIsModalOpen(false);
   };
 
-  // const handleEditPost = (postId) => {
-  //   console.log("Edit post with ID: ", postId);
-  // };
-
   return (
     <div className="container mx-auto p-4">
-      <div className="bg-cusLightBG p-6 rounded-lg shadow-md dark:bg-cusDarkBG">
+      <motion.div
+        className="bg-cusLightBG p-6 rounded-lg shadow-md dark:bg-cusDarkBG"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <div className="text-center">
-          <img
+          <motion.img
             src={profilePic}
             alt="Profile"
             className="rounded-full object-cover h-32 w-32 mx-auto mb-4"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
           />
           {isCurrentUser && editMode && (
             <input
@@ -154,7 +147,11 @@ const Profile = () => {
         <div className="mt-6">
           {isCurrentUser && editMode ? (
             <>
-              <div className="mb-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
                 <label
                   className="block text-gray-700 dark:text-gray-300 mb-2"
                   htmlFor="username"
@@ -168,11 +165,14 @@ const Profile = () => {
                   onChange={handleInputChange}
                   className="w-full p-2 border rounded dark:bg-cusLightDarkBG dark:text-gray-200"
                 />
-              </div>
-              <button
+              </motion.div>
+              <motion.button
                 onClick={handleSave}
-                disabled={isLoading} // Disable button while loading
+                disabled={isLoading}
                 className="px-4 py-2 bg-cusPrimaryColor text-white rounded hover:bg-cusSecondaryColor"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
               >
                 {isLoading ? (
                   <div className="flex justify-center items-center">
@@ -182,26 +182,30 @@ const Profile = () => {
                 ) : (
                   "Save"
                 )}
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => setEditMode(false)}
                 className="ml-4 px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-400 dark:hover:bg-gray-600"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
               >
                 Cancel
-              </button>
+              </motion.button>
             </>
           ) : (
             isCurrentUser && (
-              <button
+              <motion.button
                 onClick={() => setEditMode(true)}
-                className="px-4 py-2 bg-cusPrimaryColor text-white rounded hover:bg-cusSecondaryColor transition-colors duration-300"
+                className="px-4 py-2 bg-cusPrimaryColor text-white rounded hover:bg-cusSecondaryColor"
+                whileHover={{ scale: 1.05 }}
               >
                 Edit Profile
-              </button>
+              </motion.button>
             )
           )}
         </div>
-      </div>
+      </motion.div>
       <div className="mt-8">
         <h3 className="text-xl font-semibold text-cusPrimaryColor dark:text-cusSecondaryColor mb-4">
           {isCurrentUser ? "Your Posts" : "Posts by " + profileData.fullname}
@@ -209,9 +213,13 @@ const Profile = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {posts.length > 0 ? (
             posts.map((post) => (
-              <div
+              <motion.div
                 key={post._id}
                 className="bg-cusLightBG p-4 rounded shadow-md dark:bg-cusLightDarkBG"
+                whileHover={{ scale: 1.03 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
               >
                 {post.image && (
                   <img
@@ -270,7 +278,7 @@ const Profile = () => {
                       </span>
                     ))}
                 </div>
-              </div>
+              </motion.div>
             ))
           ) : (
             <p className="text-gray-600 dark:text-gray-400">

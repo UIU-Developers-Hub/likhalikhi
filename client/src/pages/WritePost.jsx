@@ -1,3 +1,4 @@
+import { motion } from "framer-motion"; // Import motion from framer-motion
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPost, updatePost } from "../services/postServices";
@@ -34,13 +35,11 @@ const WritePost = () => {
         ? prevTags.filter((t) => t !== tag)
         : [...prevTags, tag]
     );
-    // console.log(JSON.stringify(selectedTags));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Set loading state to true
-    // Create a new FormData object
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
@@ -65,7 +64,6 @@ const WritePost = () => {
     } finally {
       setIsLoading(false); // Set loading state to false
     }
-    // Logic to handle form submission, such as sending data to the server
   };
 
   return (
@@ -74,7 +72,13 @@ const WritePost = () => {
         {post ? "Edit Post" : "Create a New Post"}
       </h1>
       <form onSubmit={handleSubmit}>
-        <div className="mb-4">
+        {/* Title */}
+        <motion.div
+          className="mb-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <label
             className="block text-cusPrimaryColor dark:text-cusSecondaryLightColor font-medium mb-2"
             htmlFor="title"
@@ -90,8 +94,15 @@ const WritePost = () => {
             placeholder="Enter the title of your post"
             required
           />
-        </div>
-        <div className="mb-4">
+        </motion.div>
+
+        {/* Content */}
+        <motion.div
+          className="mb-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           <label
             className="block text-cusPrimaryColor dark:text-cusSecondaryLightColor font-medium mb-2"
             htmlFor="content"
@@ -107,8 +118,15 @@ const WritePost = () => {
             placeholder="Write your post content here..."
             required
           ></textarea>
-        </div>
-        <div className="mb-4">
+        </motion.div>
+
+        {/* Image Upload */}
+        <motion.div
+          className="mb-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <label
             className="block text-cusPrimaryColor dark:text-cusSecondaryLightColor font-medium mb-2"
             htmlFor="image"
@@ -119,12 +137,19 @@ const WritePost = () => {
             type="file"
             id="image"
             onChange={(e) => setImage(e.target.files[0])}
-            className="w-full p-2 border border-gray-300 rounded-lg dark:bg-cusLightDarkBG dark:text-cusSecondaryLightColor   file:mr-4 file:py-2 file:px-4 file:rounded-full file:border file:border-cusPrimaryColor file:text-sm file:font-semibold file:bg-cusLightBG dark:file:bg-cusLightDarkBG file:text-cusSecondaryColor dark:file:text-cusSecondaryLightColor hover:file:bg-cusSecondaryLightColor dark:hover:file:bg-cusSecondaryColor  "
+            className="w-full p-2 border border-gray-300 rounded-lg dark:bg-cusLightDarkBG dark:text-cusSecondaryLightColor file:mr-4 file:py-2 file:px-4 file:rounded-full file:border file:border-cusPrimaryColor file:text-sm file:font-semibold file:bg-cusLightBG dark:file:bg-cusLightDarkBG file:text-cusSecondaryColor dark:file:text-cusSecondaryLightColor hover:file:bg-cusSecondaryLightColor dark:hover:file:bg-cusSecondaryColor"
             accept="image/*"
           />
-        </div>
-        <div className="mb-4">
-          <label className="block text-cusPrimaryColor dark:text-cusSecondaryLightColor font-medium mb-2   ">
+        </motion.div>
+
+        {/* Tags */}
+        <motion.div
+          className="mb-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <label className="block text-cusPrimaryColor dark:text-cusSecondaryLightColor font-medium mb-2">
             Tags
           </label>
           <div className="flex flex-wrap gap-2">
@@ -143,8 +168,10 @@ const WritePost = () => {
               </button>
             ))}
           </div>
-        </div>
-        <button
+        </motion.div>
+
+        {/* Submit Button */}
+        <motion.button
           type="submit"
           className={`w-full py-2 rounded-lg font-semibold transition-colors ${
             isLoading
@@ -152,6 +179,9 @@ const WritePost = () => {
               : "bg-cusPrimaryColor text-white hover:bg-cusSecondaryColor"
           }`}
           disabled={isLoading}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
@@ -163,7 +193,7 @@ const WritePost = () => {
           ) : (
             "Publish Post"
           )}
-        </button>
+        </motion.button>
       </form>
     </div>
   );
