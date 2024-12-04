@@ -108,7 +108,7 @@ const Posts = () => {
               <img
                 src={post.image}
                 alt={post.title}
-                className="max-w-full h-96 md:h-full object-cover rounded-lg"
+                className="max-w-full h-96 md:h-96 object-cover rounded-lg"
               />
               <div className="absolute top-2 left-2 bg-white bg-opacity-75 text-gray-700 text-xs px-2 py-1 rounded">
                 {format(new Date(post.createdAt), "PPP")}
@@ -123,7 +123,7 @@ const Posts = () => {
               </div>
             </div>
 
-            <div className="md:w-3/5 flex flex-col justify-between">
+            {/* <div className="md:w-3/5 flex flex-col justify-between">
               <div>
                 <h2 className="text-2xl font-semibold text-cusPrimaryColor dark:text-cusSecondaryLightColor">
                   {post.title}
@@ -163,6 +163,45 @@ const Posts = () => {
                   Read More
                 </Link>
               </motion.div>
+            </div> */}
+            <div className="md:w-3/5 flex flex-col justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+                  {post.title}
+                </h2>
+                <Link
+                  to={`/profile/${post.author._id}`}
+                  className="text-cusSecondaryColor text-opacity-75 mt-2"
+                >
+                  by {post.author.fullname}
+                </Link>
+                <p className="text-cusPrimaryColor dark:text-cusSecondaryColor mt-4">
+                  {truncateText(post.content, 80)}
+                </p>
+              </div>
+              <div className="mt-4">
+                <h3 className="font-semibold text-cusPrimaryColor dark:text-cusSecondaryLightColor">
+                  Tags:
+                </h3>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {post.tags.map((tag) => (
+                    <motion.span
+                      onClick={() => handleTagClick(tag)}
+                      key={tag}
+                      whileHover={{ scale: 1.05 }}
+                      className="px-3 py-1 bg-cusSecondaryLightColor text-cusDarkBG cursor-pointer rounded-full"
+                    >
+                      {tag}
+                    </motion.span>
+                  ))}
+                </div>
+              </div>
+              <Link
+                to={`/post/${post._id}`}
+                className="mt-4 bg-cusPrimaryColor text-white py-2 px-4 rounded text-center mx-auto w-32"
+              >
+                Read More
+              </Link>
             </div>
           </motion.div>
         ))}

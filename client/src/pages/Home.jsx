@@ -69,7 +69,7 @@ const Home = () => {
                 <img
                   src={post.image}
                   alt={post.title}
-                  className="max-w-full h-96 md:h-full object-cover rounded-lg"
+                  className="max-w-full h-96  object-cover rounded-lg"
                 />
                 <div className="absolute top-2 left-2 bg-white bg-opacity-75 text-gray-700 text-xs px-2 py-1 rounded">
                   {format(new Date(post.createdAt), "PPP")}

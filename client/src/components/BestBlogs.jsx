@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { FaChevronLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getPosts } from "../services/postServices";
 
@@ -35,60 +36,51 @@ const BestBlogs = () => {
     fetchPosts();
   }, []);
 
-  const scrollLeft = () => {
-    scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
-  };
-
   return (
-    <section className="mb-8">
-      <h2 className="text-2xl  text-cusPrimaryColor dark:text-cusSecondaryLightColor font-bold mb-4">
-        Best Blogs
-      </h2>
+    <div>
+      <h2>Best Blogs</h2>
       <div className="relative">
         <button
           className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow-md"
-          onClick={scrollLeft}
+          onClick={() => {
+            if (scrollRef.current) {
+              scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
+            }
+          }}
         >
           <FaChevronLeft />
         </button>
         <div ref={scrollRef} className="flex overflow-x-auto space-x-4 pb-4">
-          {posts.map((post) => (
-            <div
+          {posts.map((post, index) => (
+            <motion.div
               key={post._id}
-              className="bg-cusLightBG dark:bg-cusLightDarkBG p-4 rounded shadow-md flex-none  w-64 md:w-72 "
+              className="flex flex-col bg-cusLightBG dark:bg-cusLightDarkBG p-4 rounded shadow-md flex-none w-64 md:w-72"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <img
                 src={post.image}
                 alt={post.title}
                 className="w-full h-40 object-cover mb-2 rounded"
               />
-              <h3 className="  text-lg text-cusPrimaryColor dark:text-cusSecondaryColor  md:text-xl font-semibold">
+              <h3 className="text-lg text-cusPrimaryColor dark:text-cusSecondaryColor md:text-xl font-semibold">
                 {post.title}
               </h3>
-              {/* <p className="text-cusPrimaryColor">{post.content}</p> */}
-              {/* <span className="text-cusSecondaryColor">{post.date}</span> */}
+              <br />
               <Link
                 to={`/post/${post._id}`}
-                // className="mt-6 pt-4 bg-cusPrimaryColor text-white py-2 px-4 rounded text-center w-32"
-                className="mt-2 py-2 px-4 bg-cusPrimaryColor text-white rounded flex justify-center w-32 "
+                className="mt-auto py-2 px-4 bg-cusPrimaryColor hover:bg-cusSecondaryColor text-white rounded flex justify-center w-32"
               >
                 Read More
               </Link>
-            </div>
+            </motion.div>
           ))}
         </div>
-        <button
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow-md"
-          onClick={scrollRight}
-        >
-          <FaChevronRight />
-        </button>
       </div>
-    </section>
+    </div>
   );
 };
 
